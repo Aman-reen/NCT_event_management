@@ -1,3 +1,38 @@
+<?php
+// Enable error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+session_start();
+include 'db_connect.php'; // Include your database connection file
+
+
+// Fetch All Events
+$result = $conn->query("SELECT * FROM events ORDER BY id DESC");
+$events_json = [];
+$today = date('Y-m-d');
+
+while ($row = $result->fetch_assoc()) {
+  $isPast = ($row['end_date'] < $today) ? true : false; // Check if event is past
+  $events_json[] = [
+    'title' => $row['event_name'],
+    'start' => $row['start_date'] . 'T' . $row['start_time'],
+    'end' => $row['end_date'] . 'T' . $row['end_time'],
+    'description' => $row['description'],
+    'location' => $row['location'],
+    'status' => $isPast ? 'past' : 'upcoming' // Assign event status
+  ];
+}
+
+
+if (!isset($_SESSION['email'])) {
+  header("Location: login.html");
+  exit();
+}
+$user_email = $_SESSION['email'];
+?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">
